@@ -1,4 +1,4 @@
-Keep Cart (v1.1) Add-on for Zen Cart
+Keep Cart (v2.0.0) Plugin for Zen Cart
 =====================================
 
 Created by Christian Pinder.
@@ -6,15 +6,13 @@ Copyright (c) C.J.Pinder 2009
 
 (Updated by yaseent December 2016 - all credits to Christian Pinder)
 
-For Zen Cart & eCommerce hints, tips and information visit:
-http://www.zen-unlocked.com
+Updated 20211107-lat9: Copyright (C) 2021, Vinos de Frutas Tropicales
 
 ATTENTION:
 ==========
 
-This module has been successfully tested on Zen Cart v1.3.7 and v1.3.8. You 
-may or may not be able to get it to work with other versions - I suggest 
-you proceed with caution and always back up your site before you start!
+This module requires that the site be run on a PHP version of 7.3.0 or later!  It's been
+validated on Zen Cart versions 1.5.7 (fully patched) and later.
 
 
 Installation Instructions
@@ -23,39 +21,41 @@ Installation Instructions
 It is strongly recommended that you back up your files and your 
 database before making changes to your installation.
 
-1) Unpack the zip file to a temporary directory
+1) Unpack the zip file to a temporary directory and rename the 'YOUR_ADMIN' sub-directory
+   to match the name of your Zen Cart admin folder.
 
-2) Using the Admin->Tools->Install SQL Patch, run the included SQL file (keep_cart.sql)
-
-   The keep_cart.sql file has instructions to add new options to the
-   Admin->Configuration->Sessions menu.
-
-3) All of the files in this package are stored in the same directory structure
+2) All of the files in this package are stored in the same directory structure
    as the default Zen Cart package. Upload the files into the appropriate directories
    on your server. You do not need to edit any files.
 
-4) In Admin click on the Configuration menu and select Sessions.
-   Set the following options:
-   Keep Vistors Cart: Set to True to enable Keep Cart, False to turn it off.
-   Days Before Cart Expires: Set to the number of days to keep the vistors cart.
-   Keep Cart Secret Key: Set to a random string of numbers and letters about 15-20 long.
+3) In Admin click on the Configuration menu and select Sessions and set the following options:
+   - Keep Visitor's Cart: Set to True to enable Keep Cart, False to turn it off.  The admin processing
+     will force this value to 'False' if the site's PHP version is less than 7.3.0!
+
+   - Days Before Cart Expires: Set to the number of days to keep the visitor's cart.
+
+   - Keep Cart Secret Key: Set to a random string of numbers and letters about 15-20 long.  The storefront
+     processing will disable its processing (with a warning logged) if the plugin has been enabled, but this
+     value is unchanged from its default ('change me') value.
    
-5) Installation complete!
+4) Installation complete!
 
 How to Uninstall
 ================
 
-If you wish to uninstall this module do the following:
-1) Delete includes/auto_loaders/config.savecart.php from your server.
-2) Delete includes/classes/observers/class.savecart.php from your server.
-3) Using the Admin->Tools->Install SQL Patch, run the uninstall.sql file included in this package.
-4) Uninstall complete!
+If you wish to uninstall this module, delete the following files from your server:
+    - /includes/auto_loaders/config.savecart.php
+    - /includes/classes/observers/class.savecart.php
+    - /YOUR_ADMIN/includes/auto_loaders/config.savecart_admin.php
+    - /YOUR_ADMIN/includes/init_includes/init_savecart_admin.php
+
+Then, using your Admin->Tools->Install SQL Patch, run the uninstall.sql file included in this package.
 
 Using Keep Cart
 ===============
 
-Keep Cart stores a copy of the contents of the vistor's cart in a cookie.
-The contents of the cart is automatically reloaded when the vistor comes
+Keep Cart stores a copy of the contents of the visitor's cart in a cookie.
+The contents of the cart is automatically reloaded when the visitor comes
 back to your store or if their session expires and restarts.
 
 Any products that have been sold out, disabled or deleted since they were
@@ -69,6 +69,12 @@ with the cookie on the visitor's PC.
 
 VERSION HISTORY
 ===============
+v2.0.0, 20211109, lat9
+    - The minimum PHP version supported is 7.3.0, enables the 'samesite' attribute for the savecart cookies.
+      "Keep Cart" cookies are stored with 'samesite=lax'.
+    - Cookies are kept **only** for non-logged-in customers.  Otherwise, there would be duplication of products
+      restored to the customer's cart upon re-login.
+    - Admin installation now included, no more SQL-install script!
 
 v1.1: Release by C.J. Pinder, update by ayseent. December 2016
 
