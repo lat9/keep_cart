@@ -1,4 +1,4 @@
-Keep Cart (v2.0.0) Plugin for Zen Cart
+Keep Cart (v2.0.1) Plugin for Zen Cart
 =====================================
 
 Created by Christian Pinder.
@@ -7,6 +7,7 @@ Copyright (c) C.J.Pinder 2009
 (Updated by yaseent December 2016 - all credits to Christian Pinder)
 
 Updated 20211107-lat9: Copyright (C) 2021, Vinos de Frutas Tropicales
+Updated 20211210-lat9: Copyright (C) 2021, Vinos de Frutas Tropicales
 
 ATTENTION:
 ==========
@@ -69,6 +70,9 @@ with the cookie on the visitor's PC.
 
 VERSION HISTORY
 ===============
+v2.0.1, 20211210, lat9/marco-pm
+    - Correct timeout after cart restored.
+
 v2.0.0, 20211109, lat9
     - The minimum PHP version supported is 7.3.0, enables the 'samesite' attribute for the savecart cookies.
       "Keep Cart" cookies are stored with 'samesite=lax'.

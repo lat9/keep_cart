@@ -1,5 +1,7 @@
 <?php
 /*
+Keep-Cart v2.0.1
+
 Copyright C.J.Pinder 2009 http://www.zen-unlocked.com
 Copyright 2021, lat9, https://vinosdefrutastropicales.com
 
@@ -132,6 +134,12 @@ class save_cart extends base
                             }
                         }
                     }
+
+                    // -----
+                    // Now, recalculate the 'cartID' based on the just-added items; otherwise, the cartID isn't set
+                    // and the customer would be redirected to the time_out page when they attempt to checkout.
+                    //
+                    $_SESSION['cart']->cartID = $_SESSION['cart']->generate_cart_id();
                 }
             }
         }
