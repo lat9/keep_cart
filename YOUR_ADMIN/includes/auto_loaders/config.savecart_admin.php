@@ -4,7 +4,7 @@
 //
 // Copyright (c) 2021, Vinos de Frutas Tropicales (lat9)
 //
-$autoLoadConfig[200][] = array(
+$autoLoadConfig[200][] = [
     'autoType' => 'init_script',
     'loadFile' => 'init_savecart_admin.php'
-);
+];
