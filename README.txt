@@ -1,4 +1,4 @@
-Keep Cart (v2.0.1) Plugin for Zen Cart
+Keep Cart (v2.0.2) Plugin for Zen Cart
 =====================================
 
 Created by Christian Pinder.
@@ -8,6 +8,7 @@ Copyright (c) C.J.Pinder 2009
 
 Updated 20211107-lat9: Copyright (C) 2021, Vinos de Frutas Tropicales
 Updated 20211210-lat9: Copyright (C) 2021, Vinos de Frutas Tropicales
+Updated 20220307-lat9: Copyright (C) 2022, Vinos de Frutas Tropicales
 
 ATTENTION:
 ==========
@@ -70,6 +71,9 @@ with the cookie on the visitor's PC.
 
 VERSION HISTORY
 ===============
+v2.0.2, 20220307, lat9
+    - Correct MySQL error when cart contains checkbox-type attributes.
+
 v2.0.1, 20211210, lat9/marco-pm
     - Correct timeout after cart restored.
 

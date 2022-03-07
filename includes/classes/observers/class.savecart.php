@@ -1,9 +1,9 @@
 <?php
 /*
-Keep-Cart v2.0.1
+Keep-Cart v2.0.2
 
 Copyright C.J.Pinder 2009 http://www.zen-unlocked.com
-Copyright 2021, lat9, https://vinosdefrutastropicales.com
+Copyright 2021-2022, lat9, https://vinosdefrutastropicales.com
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -105,7 +105,7 @@ class save_cart extends base
                                                 ON pov.products_options_values_id = pa.options_values_id
                                                AND pov.language_id = $language_id
                                       WHERE pa.products_id = $prid
-                                        AND pa.options_id = $options_id
+                                        AND pa.options_id = " . (int)$options_id . "
                                         AND pa.options_values_id = " . (int)$options_values_id . "
                                       LIMIT 1"
                                 );
