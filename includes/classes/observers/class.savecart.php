@@ -34,7 +34,7 @@ class save_cart extends base
         global $db;
 
         if (defined('KEEP_CART_ENABLED') && KEEP_CART_ENABLED === 'True' && defined('KEEP_CART_DURATION') && defined('KEEP_CART_SECRET')) {
-            if (version_compare(PHP_VERSION, '7.3.0', '<')) {
+            if (PHP_VERSION_ID < 70300) {
                 trigger_error('Keep Cart requires PHP 7.3.0 or later; currently using PHP ' . PHP_VERSION . '.  Keep Cart has been disabled.', E_USER_WARNING);
                 return;
             }
@@ -53,13 +53,13 @@ class save_cart extends base
                 'NOTIFY_HEADER_START_LOGOFF',
             ]);
 
-            if (isset($_COOKIE['cart']) && isset($_COOKIE['cartkey']) && empty($_SESSION['cart']->contents)) {
+            if (isset($_COOKIE['cart'], $_COOKIE['cartkey']) && empty($_SESSION['cart']->contents)) {
                 $cookie_value = $_COOKIE['cart'];
                 $hash_key = md5(KEEP_CART_SECRET . $cookie_value);
                 if ($hash_key === $_COOKIE['cartkey']) {
                     $cart_contents = base64_decode($cookie_value);
                     $cart_contents = gzuncompress($cart_contents);
-                    $_SESSION['cart']->contents = unserialize($cart_contents);
+                    $_SESSION['cart']->contents = unserialize($cart_contents, ['save_cart']);
 
                     // -----
                     // Loop through each of the now-restored cart products, checking that there is sufficient
@@ -192,3 +192,4 @@ class save_cart extends base
         }
     }
 }
+
