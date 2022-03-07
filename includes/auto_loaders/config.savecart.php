@@ -17,6 +17,5 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$autoLoadConfig[90][] = array('autoType'=>'class', 'loadFile'=>'observers/class.savecart.php');
-$autoLoadConfig[90][] = array('autoType'=>'classInstantiate','className'=>'save_cart','objectName'=>'save_cart');
-?>
+$autoLoadConfig[90][] = ['autoType'=>'class', 'loadFile'=>'observers/class.savecart.php'];
+$autoLoadConfig[90][] = ['autoType'=>'classInstantiate','className'=>'save_cart','objectName'=>'save_cart'];
