@@ -6,5 +6,5 @@
 //
 $autoLoadConfig[200][] = [
     'autoType' => 'init_script',
-    'loadFile' => 'init_savecart_admin.php'
+    'loadFile' => 'init_keep_cart_admin.php'
 ];

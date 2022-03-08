@@ -27,7 +27,7 @@ if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-class save_cart extends base
+class keep_cart extends base
 {
     public function __construct()
     {
@@ -145,6 +145,12 @@ class save_cart extends base
         }
     }
 
+    /**
+     * @param $class
+     * @param $eventID
+     *
+     * @return void
+     */
     public function update(&$class, $eventID)
     {
         $domain = str_replace(
