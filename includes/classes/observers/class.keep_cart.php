@@ -43,14 +43,14 @@ class keep_cart extends base
                 return;
             }
             $this->attach($this, [
-                'NOTIFIER_CART_ADD_CART_END',
-                'NOTIFIER_CART_UPDATE_QUANTITY_END',
-                'NOTIFIER_CART_CLEANUP_END',
-                'NOTIFIER_CART_REMOVE_END',
-                'NOTIFIER_CART_RESET_END',
-                'NOTIFIER_CART_RESTORE_CONTENTS_END',
-                'NOTIFY_HEADER_START_CHECKOUT_SUCCESS',
-                'NOTIFY_HEADER_START_LOGOFF',
+                'NOTIFIER_CART_ADD_CART_END',           //on completion of function add_cart: when a product is added to the cart
+                'NOTIFIER_CART_UPDATE_QUANTITY_END',    //on completion of function add_cart: when a cart quantity is modified
+                'NOTIFIER_CART_CLEANUP_END',            //on completion of function cleanup: removal of zero quantity items from the cart
+                'NOTIFIER_CART_REMOVE_END',             //on completion of function remove: removal of a product from the cart
+                'NOTIFIER_CART_RESET_END',              //on completion of function reset: clears all products from the cart
+                'NOTIFIER_CART_RESTORE_CONTENTS_END',   //on completion of function restore_contents: restore of cart contents as stored in the database, when customer logs in
+                'NOTIFY_HEADER_START_CHECKOUT_SUCCESS', //on pageload/header of checkout_success/order completion
+                'NOTIFY_HEADER_START_LOGOFF',           //on pageload/header of logoff
             ]);
 
             if (isset($_COOKIE['cart'], $_COOKIE['cartkey']) && empty($_SESSION['cart']->contents)) {
