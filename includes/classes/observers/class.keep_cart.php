@@ -59,7 +59,7 @@ class keep_cart extends base
                 if ($hash_key === $_COOKIE['cartkey']) {
                     $cart_contents = base64_decode($cookie_value);
                     $cart_contents = gzuncompress($cart_contents);
-                    $_SESSION['cart']->contents = unserialize($cart_contents, ['save_cart']);
+                    $_SESSION['cart']->contents = unserialize($cart_contents, ['keep_cart']);
 
                     // -----
                     // Loop through each of the now-restored cart products, checking that there is sufficient
