@@ -177,6 +177,9 @@ class keep_cart extends base
             case 'NOTIFIER_CART_UPDATE_QUANTITY_END':
             case 'NOTIFIER_CART_CLEANUP_END':
             case 'NOTIFIER_CART_REMOVE_END':
+            if (empty($_SESSION['cart']->contents )) {
+                goto remove_cookies;
+            }
                 if (!zen_is_logged_in() || zen_in_guest_checkout()) {
                     $cookie_value = serialize($_SESSION['cart']->contents);
                     $cookie_value = gzcompress($cookie_value, 9);
@@ -191,6 +194,7 @@ class keep_cart extends base
             case 'NOTIFY_HEADER_START_LOGOFF':
             case 'NOTIFY_HEADER_START_CHECKOUT_SUCCESS':
             case 'NOTIFIER_CART_RESTORE_CONTENTS_END':
+                remove_cookies:
                 $cookie_options['expires'] = time() - 3600;
                 setcookie('cart', '', $cookie_options);
                 setcookie('cartkey', '', $cookie_options);
@@ -198,4 +202,3 @@ class keep_cart extends base
         }
     }
 }
-
