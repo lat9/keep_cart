@@ -151,7 +151,7 @@ class keep_cart extends base
      *
      * @return void
      */
-    public function update(&$class, $eventID)
+    public function update(&$class, $eventID): void
     {
         $domain = str_replace(
             [
@@ -194,7 +194,7 @@ class keep_cart extends base
             case 'NOTIFY_HEADER_START_LOGOFF':
             case 'NOTIFY_HEADER_START_CHECKOUT_SUCCESS':
             case 'NOTIFIER_CART_RESTORE_CONTENTS_END':
-                remove_cookies:
+               remove_cookies:
                 $cookie_options['expires'] = time() - 3600;
                 setcookie('cart', '', $cookie_options);
                 setcookie('cartkey', '', $cookie_options);
