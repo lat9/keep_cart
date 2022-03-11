@@ -27,14 +27,14 @@ if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-class save_cart extends base
+class keep_cart extends base
 {
     public function __construct()
     {
         global $db;
 
         if (defined('KEEP_CART_ENABLED') && KEEP_CART_ENABLED === 'True' && defined('KEEP_CART_DURATION') && defined('KEEP_CART_SECRET')) {
-            if (version_compare(PHP_VERSION, '7.3.0', '<')) {
+            if (PHP_VERSION_ID < 70300) {
                 trigger_error('Keep Cart requires PHP 7.3.0 or later; currently using PHP ' . PHP_VERSION . '.  Keep Cart has been disabled.', E_USER_WARNING);
                 return;
             }
@@ -43,23 +43,23 @@ class save_cart extends base
                 return;
             }
             $this->attach($this, [
-                'NOTIFIER_CART_ADD_CART_END',
-                'NOTIFIER_CART_UPDATE_QUANTITY_END',
-                'NOTIFIER_CART_CLEANUP_END',
-                'NOTIFIER_CART_REMOVE_END',
-                'NOTIFIER_CART_RESET_END',
-                'NOTIFIER_CART_RESTORE_CONTENTS_END',
-                'NOTIFY_HEADER_START_CHECKOUT_SUCCESS',
-                'NOTIFY_HEADER_START_LOGOFF',
+                'NOTIFIER_CART_ADD_CART_END',           //on completion of function add_cart: when a product is added to the cart
+                'NOTIFIER_CART_UPDATE_QUANTITY_END',    //on completion of function add_cart: when a cart quantity is modified
+                'NOTIFIER_CART_CLEANUP_END',            //on completion of function cleanup: removal of zero quantity items from the cart
+                'NOTIFIER_CART_REMOVE_END',             //on completion of function remove: removal of a product from the cart
+                'NOTIFIER_CART_RESET_END',              //on completion of function reset: clears all products from the cart
+                'NOTIFIER_CART_RESTORE_CONTENTS_END',   //on completion of function restore_contents: restore of cart contents as stored in the database, when customer logs in
+                'NOTIFY_HEADER_START_CHECKOUT_SUCCESS', //on pageload/header of checkout_success/order completion
+                'NOTIFY_HEADER_START_LOGOFF',           //on pageload/header of logoff
             ]);
 
-            if (isset($_COOKIE['cart']) && isset($_COOKIE['cartkey']) && empty($_SESSION['cart']->contents)) {
+            if (isset($_COOKIE['cart'], $_COOKIE['cartkey']) && empty($_SESSION['cart']->contents)) {
                 $cookie_value = $_COOKIE['cart'];
                 $hash_key = md5(KEEP_CART_SECRET . $cookie_value);
                 if ($hash_key === $_COOKIE['cartkey']) {
                     $cart_contents = base64_decode($cookie_value);
                     $cart_contents = gzuncompress($cart_contents);
-                    $_SESSION['cart']->contents = unserialize($cart_contents);
+                    $_SESSION['cart']->contents = unserialize($cart_contents, ['keep_cart']);
 
                     // -----
                     // Loop through each of the now-restored cart products, checking that there is sufficient
@@ -145,7 +145,13 @@ class save_cart extends base
         }
     }
 
-    public function update(&$class, $eventID)
+    /**
+     * @param $class
+     * @param $eventID
+     *
+     * @return void
+     */
+    public function update(&$class, $eventID): void
     {
         $domain = str_replace(
             [
@@ -165,22 +171,22 @@ class save_cart extends base
             'httponly' => true,
             'samesite' => 'lax'
         ];
-        switch ($eventID)
-        {
+        switch ($eventID) {
             case 'NOTIFIER_CART_ADD_CART_END':
             case 'NOTIFIER_CART_UPDATE_QUANTITY_END':
             case 'NOTIFIER_CART_CLEANUP_END':
             case 'NOTIFIER_CART_REMOVE_END':
-                if (!zen_is_logged_in() || zen_in_guest_checkout()) {
-                    $cookie_value = serialize($_SESSION['cart']->contents);
-                    $cookie_value = gzcompress($cookie_value, 9);
-                    $cookie_value = base64_encode($cookie_value);
-                    $hash_key = md5(KEEP_CART_SECRET . $cookie_value);
-                    setcookie('cart', $cookie_value, $cookie_options);
-                    setcookie('cartkey', $hash_key, $cookie_options);
-                }
-                break;
-
+                if (!empty($_SESSION['cart']->contents)) {
+                    if (!zen_is_logged_in() || zen_in_guest_checkout()) {
+                        $cookie_value = serialize($_SESSION['cart']->contents);
+                        $cookie_value = gzcompress($cookie_value, 9);
+                        $cookie_value = base64_encode($cookie_value);
+                        $hash_key = md5(KEEP_CART_SECRET . $cookie_value);
+                        setcookie('cart', $cookie_value, $cookie_options);
+                        setcookie('cartkey', $hash_key, $cookie_options);
+                    }
+                    break;
+                } // - else fall through to remove cookie on empty cart
             case 'NOTIFIER_CART_RESET_END':
             case 'NOTIFY_HEADER_START_LOGOFF':
             case 'NOTIFY_HEADER_START_CHECKOUT_SUCCESS':
