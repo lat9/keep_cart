@@ -65,6 +65,20 @@ class save_cart extends base
                 if ($hash_key === $_COOKIE['cartkey']) {
                     $cart_contents = base64_decode($cookie_value);
                     $cart_contents = gzuncompress($cart_contents);
+                    
+                    // -----
+                    // If the uncompressed cookie contents' isn't an object, it's also not
+                    // a cart-contents' object!  Expire the cookie and do a "quick return" so that
+                    // the session's cart object (already empty) isn't mangled.
+                    //
+                    if (!is_object($cart_contents)) {
+                        $this->expireKeepCartCookie();
+                        return;
+                    }
+
+                    // -----
+                    // Otherwise, continue with the cart's restoration from the valid cookie.
+                    //
                     $_SESSION['cart']->contents = unserialize($cart_contents);
 
                     // -----
@@ -191,10 +205,15 @@ class save_cart extends base
             case 'NOTIFY_HEADER_START_LOGOFF':
             case 'NOTIFY_HEADER_START_CHECKOUT_SUCCESS':
             case 'NOTIFIER_CART_RESTORE_CONTENTS_END':
-                $cookie_options['expires'] = time() - 3600;
-                setcookie('cart', '', $cookie_options);
-                setcookie('cartkey', '', $cookie_options);
+                $this->expireKeepCartCookie();
                 break;
         }
+    }
+
+    protected function expireKeepCartCookie()
+    {
+        $cookie_options['expires'] = time() - 3600;
+        setcookie('cart', '', $cookie_options);
+        setcookie('cartkey', '', $cookie_options);
     }
 }

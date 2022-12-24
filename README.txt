@@ -9,7 +9,7 @@ Copyright (c) C.J.Pinder 2009
 Updated 20211107-lat9: Copyright (C) 2021, Vinos de Frutas Tropicales
 Updated 20211210-lat9: Copyright (C) 2021, Vinos de Frutas Tropicales
 Updated 20220307-lat9: Copyright (C) 2022, Vinos de Frutas Tropicales
-Updated 20221224-lat9: Copyright (C) 2022, Vinos de Frutas Tropicales
+Updated 20221224-lat9, prosela: Copyright (C) 2022, Vinos de Frutas Tropicales
 
 ATTENTION:
 ==========
@@ -74,6 +74,7 @@ VERSION HISTORY
 ===============
 v2.0.3, 20221224, lat9
     - Log configuration errors only once per customer session.
+    - Prevent PHP warnings by expiring a "Keep Cart" cookie if its data is invalid.
 
 v2.0.2, 20220307, lat9
     - Correct MySQL error when cart contains checkbox-type attributes.
