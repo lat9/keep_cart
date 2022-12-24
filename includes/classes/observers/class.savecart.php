@@ -1,6 +1,6 @@
 <?php
 /*
-Keep-Cart v2.0.2
+Keep-Cart v2.0.3
 
 Copyright C.J.Pinder 2009 http://www.zen-unlocked.com
 Copyright 2021-2022, lat9, https://vinosdefrutastropicales.com
@@ -35,11 +35,17 @@ class save_cart extends base
 
         if (defined('KEEP_CART_ENABLED') && KEEP_CART_ENABLED === 'True' && defined('KEEP_CART_DURATION') && defined('KEEP_CART_SECRET')) {
             if (version_compare(PHP_VERSION, '7.3.0', '<')) {
-                trigger_error('Keep Cart requires PHP 7.3.0 or later; currently using PHP ' . PHP_VERSION . '.  Keep Cart has been disabled.', E_USER_WARNING);
+                if (!isset($_SESSION['kc_disabled_logged'])) {
+                    trigger_error('Keep Cart requires PHP 7.3.0 or later; currently using PHP ' . PHP_VERSION . '.  Keep Cart has been disabled.', E_USER_WARNING);
+                }
+                $_SESSION['kc_disabled_logged'] = true;
                 return;
             }
             if (KEEP_CART_SECRET === 'change me') {
-                trigger_error('Keep Cart "Secret" setting requires change prior to use.  Keep Cart has been disabled.', E_USER_WARNING);
+                if (!isset($_SESSION['kc_disabled_logged'])) {
+                    trigger_error('Keep Cart "Secret" setting requires change prior to use.  Keep Cart has been disabled.', E_USER_WARNING);
+                }
+                $_SESSION['kc_disabled_logged'] = true;
                 return;
             }
             $this->attach($this, [

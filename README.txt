@@ -1,4 +1,4 @@
-Keep Cart (v2.0.2) Plugin for Zen Cart
+Keep Cart (v2.0.3) Plugin for Zen Cart
 =====================================
 
 Created by Christian Pinder.
@@ -9,12 +9,13 @@ Copyright (c) C.J.Pinder 2009
 Updated 20211107-lat9: Copyright (C) 2021, Vinos de Frutas Tropicales
 Updated 20211210-lat9: Copyright (C) 2021, Vinos de Frutas Tropicales
 Updated 20220307-lat9: Copyright (C) 2022, Vinos de Frutas Tropicales
+Updated 20221224-lat9: Copyright (C) 2022, Vinos de Frutas Tropicales
 
 ATTENTION:
 ==========
 
 This module requires that the site be run on a PHP version of 7.3.0 or later!  It's been
-validated on Zen Cart versions 1.5.7 (fully patched) and later.
+validated on Zen Cart versions 1.5.7 (fully patched) and 1.5.8.
 
 
 Installation Instructions
@@ -71,6 +72,9 @@ with the cookie on the visitor's PC.
 
 VERSION HISTORY
 ===============
+v2.0.3, 20221224, lat9
+    - Log configuration errors only once per customer session.
+
 v2.0.2, 20220307, lat9
     - Correct MySQL error when cart contains checkbox-type attributes.
 
