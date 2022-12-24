@@ -59,7 +59,7 @@ class save_cart extends base
                 'NOTIFY_HEADER_START_LOGOFF',
             ]);
 
-            if (isset($_COOKIE['cart']) && isset($_COOKIE['cartkey']) && empty($_SESSION['cart']->contents)) {
+            if (isset($_COOKIE['cart'], $_COOKIE['cartkey']) && empty($_SESSION['cart']->contents)) {
                 $cookie_value = $_COOKIE['cart'];
                 $hash_key = md5(KEEP_CART_SECRET . $cookie_value);
                 if ($hash_key === $_COOKIE['cartkey']) {
@@ -185,21 +185,22 @@ class save_cart extends base
             'httponly' => true,
             'samesite' => 'lax'
         ];
-        switch ($eventID)
-        {
+        switch ($eventID) {
             case 'NOTIFIER_CART_ADD_CART_END':
             case 'NOTIFIER_CART_UPDATE_QUANTITY_END':
             case 'NOTIFIER_CART_CLEANUP_END':
             case 'NOTIFIER_CART_REMOVE_END':
-                if (!zen_is_logged_in() || zen_in_guest_checkout()) {
-                    $cookie_value = serialize($_SESSION['cart']->contents);
-                    $cookie_value = gzcompress($cookie_value, 9);
-                    $cookie_value = base64_encode($cookie_value);
-                    $hash_key = md5(KEEP_CART_SECRET . $cookie_value);
-                    setcookie('cart', $cookie_value, $cookie_options);
-                    setcookie('cartkey', $hash_key, $cookie_options);
-                }
-                break;
+                if (!empty($_SESSION['cart']->contents)) {
+                    if (!zen_is_logged_in() || zen_in_guest_checkout()) {
+                        $cookie_value = serialize($_SESSION['cart']->contents);
+                        $cookie_value = gzcompress($cookie_value, 9);
+                        $cookie_value = base64_encode($cookie_value);
+                        $hash_key = md5(KEEP_CART_SECRET . $cookie_value);
+                        setcookie('cart', $cookie_value, $cookie_options);
+                        setcookie('cartkey', $hash_key, $cookie_options);
+                    }
+                    break;
+                }               //- If cart is empty, fall through to expire the "Keep Cart" cookies
 
             case 'NOTIFIER_CART_RESET_END':
             case 'NOTIFY_HEADER_START_LOGOFF':
