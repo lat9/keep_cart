@@ -59,19 +59,18 @@ class save_cart extends base
                 'NOTIFY_HEADER_START_LOGOFF',
             ]);
 
-            if (isset($_COOKIE['cart'], $_COOKIE['cartkey']) && empty($_SESSION['cart']->contents)) {
+            if (isset($_COOKIE['cart'], $_COOKIE['cartkey']) && isset($_SESSION['cart']) && empty($_SESSION['cart']->contents)) {
                 $cookie_value = $_COOKIE['cart'];
                 $hash_key = md5(KEEP_CART_SECRET . $cookie_value);
                 if ($hash_key === $_COOKIE['cartkey']) {
                     $cart_contents = base64_decode($cookie_value);
                     $cart_contents = gzuncompress($cart_contents);
-                    
+
                     // -----
-                    // If the uncompressed cookie contents' isn't an object, it's also not
-                    // a cart-contents' object!  Expire the cookie and do a "quick return" so that
-                    // the session's cart object (already empty) isn't mangled.
+                    // If the uncompressed cookie contents' can't be uncompressed, the cookie's somehow
+                    // gotten to an invalid format; simply expire the cookie so that we'll start over.
                     //
-                    if (!is_object($cart_contents)) {
+                    if ($cart_contents === false) {
                         $this->expireKeepCartCookie();
                         return;
                     }
