@@ -29,6 +29,8 @@ if (!defined('IS_ADMIN_FLAG')) {
 
 class save_cart extends base
 {
+    private array $cookie_options = [];
+
     public function __construct()
     {
         global $db;
@@ -48,6 +50,18 @@ class save_cart extends base
                 $_SESSION['kc_disabled_logged'] = true;
                 return;
             }
+
+            $domain = str_replace(['https://', 'http://', '//'], '', strtolower(HTTP_SERVER));
+            $secure = (stripos(HTTP_SERVER, 'https://') === 0);
+            $this->cookie_options = [
+                'expires' => strtotime('+' . ((ctype_digit(KEEP_CART_DURATION)) ? KEEP_CART_DURATION : '30') . ' days'),
+                'path' => DIR_WS_CATALOG,
+                'domain' => $domain,
+                'secure' => $secure,
+                'httponly' => true,
+                'samesite' => 'lax'
+            ];
+
             $this->attach($this, [
                 'NOTIFIER_CART_ADD_CART_END',
                 'NOTIFIER_CART_UPDATE_QUANTITY_END',
@@ -166,24 +180,6 @@ class save_cart extends base
 
     public function update(&$class, $eventID)
     {
-        $domain = str_replace(
-            [
-                'https://',
-                'http://',
-                '//'
-            ],
-            '',
-            strtolower(HTTP_SERVER)
-        );
-        $secure = (stripos(HTTP_SERVER, 'https://') === 0);
-        $cookie_options = [
-            'expires' => strtotime('+' . ((ctype_digit(KEEP_CART_DURATION)) ? KEEP_CART_DURATION : '30') . ' days'),
-            'path' => DIR_WS_CATALOG,
-            'domain' => $domain,
-            'secure' => $secure,
-            'httponly' => true,
-            'samesite' => 'lax'
-        ];
         switch ($eventID) {
             case 'NOTIFIER_CART_ADD_CART_END':
             case 'NOTIFIER_CART_UPDATE_QUANTITY_END':
@@ -195,8 +191,8 @@ class save_cart extends base
                         $cookie_value = gzcompress($cookie_value, 9);
                         $cookie_value = base64_encode($cookie_value);
                         $hash_key = md5(KEEP_CART_SECRET . $cookie_value);
-                        setcookie('cart', $cookie_value, $cookie_options);
-                        setcookie('cartkey', $hash_key, $cookie_options);
+                        setcookie('cart', $cookie_value, $this->cookie_options);
+                        setcookie('cartkey', $hash_key, $this->cookie_options);
                     }
                     break;
                 }               //- If cart is empty, fall through to expire the "Keep Cart" cookies
@@ -212,8 +208,8 @@ class save_cart extends base
 
     protected function expireKeepCartCookie()
     {
-        $cookie_options['expires'] = time() - 3600;
-        setcookie('cart', '', $cookie_options);
-        setcookie('cartkey', '', $cookie_options);
+        $this->cookie_options['expires'] = time() - 3600;
+        setcookie('cart', '', $this->cookie_options);
+        setcookie('cartkey', '', $this->cookie_options);
     }
 }
