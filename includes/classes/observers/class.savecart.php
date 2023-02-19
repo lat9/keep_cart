@@ -184,7 +184,7 @@ class save_cart extends base
      * @param $eventID
      * @return void
      */
-    public function update(&$class, $eventID)
+    public function update(&$class, $eventID): void
     {
         switch ($eventID) {
             case 'NOTIFIER_CART_ADD_CART_END':        // on adding a product to the cart
@@ -215,7 +215,7 @@ class save_cart extends base
     /**
      * @return void
      */
-    protected function expireKeepCartCookie()
+    protected function expireKeepCartCookie(): void
     {
         $this->cookie_options['expires'] = time() - 3600;
         setcookie('cart', '', $this->cookie_options);
