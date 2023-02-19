@@ -63,14 +63,15 @@ class save_cart extends base
             ];
 
             $this->attach($this, [
-                'NOTIFIER_CART_ADD_CART_END',
-                'NOTIFIER_CART_UPDATE_QUANTITY_END',
-                'NOTIFIER_CART_CLEANUP_END',
-                'NOTIFIER_CART_REMOVE_END',
-                'NOTIFIER_CART_RESET_END',
-                'NOTIFIER_CART_RESTORE_CONTENTS_END',
-                'NOTIFY_HEADER_START_CHECKOUT_SUCCESS',
-                'NOTIFY_HEADER_START_LOGOFF',
+                'NOTIFIER_CART_ADD_CART_END',           //on completion of function add_cart: when a product is added to the cart
+                'NOTIFIER_CART_UPDATE_QUANTITY_END',    //on completion of function add_cart: when a cart quantity is modified
+                'NOTIFIER_CART_CLEANUP_END',            //on completion of function cleanup: removal of zero quantity items from the cart:
+                // after add_cart / after restore_contents and 'NOTIFIER_CART_RESTORE_CONTENTS_END'
+                'NOTIFIER_CART_REMOVE_END',             //on completion of function remove: removal of a product from the cart
+                'NOTIFIER_CART_RESET_END',              //on completion of function reset: clears all products from the cart: _construct / remove_all / restore_contents (prior to 'NOTIFIER_CART_RESTORE_CONTENTS_END')
+                'NOTIFIER_CART_RESTORE_CONTENTS_END',   //on completion of function restore_contents: restore of cart contents as stored in the database, when customer logs in
+                'NOTIFY_HEADER_START_CHECKOUT_SUCCESS', //on pageload/header of checkout_success/order completion
+                'NOTIFY_HEADER_START_LOGOFF',           //on pageload/header of logoff
             ]);
 
             if (isset($_COOKIE['cart'], $_COOKIE['cartkey']) && isset($_SESSION['cart']) && empty($_SESSION['cart']->contents)) {
@@ -155,7 +156,7 @@ class save_cart extends base
 
                         // -----
                         // Finally, make sure that there's stock available for purchase (if the store's so configured).  If there's no
-                        // stock, the associated product is removed from the customer's cart; if there's not
+                        // stock, the associated product is removed from the customer's cart; if there is not
                         // sufficient stock, the product's cart-quantity is reduced to what's available.
                         //
                         if (STOCK_ALLOW_CHECKOUT === 'false') {
@@ -178,13 +179,18 @@ class save_cart extends base
         }
     }
 
+    /**
+     * @param $class
+     * @param $eventID
+     * @return void
+     */
     public function update(&$class, $eventID)
     {
         switch ($eventID) {
-            case 'NOTIFIER_CART_ADD_CART_END':
-            case 'NOTIFIER_CART_UPDATE_QUANTITY_END':
-            case 'NOTIFIER_CART_CLEANUP_END':
-            case 'NOTIFIER_CART_REMOVE_END':
+            case 'NOTIFIER_CART_ADD_CART_END':        // on adding a product to the cart
+            case 'NOTIFIER_CART_UPDATE_QUANTITY_END': // on change quantity in cart
+            case 'NOTIFIER_CART_CLEANUP_END':         // at the end of add to cart and restore stored basket to cart post-login
+            case 'NOTIFIER_CART_REMOVE_END':          // on removal/delete product from cart
                 if (!empty($_SESSION['cart']->contents)) {
                     if (!zen_is_logged_in() || zen_in_guest_checkout()) {
                         $cookie_value = serialize($_SESSION['cart']->contents);
@@ -195,8 +201,8 @@ class save_cart extends base
                         setcookie('cartkey', $hash_key, $this->cookie_options);
                     }
                     break;
-                }               //- If cart is empty, fall through to expire the "Keep Cart" cookies
-
+                }
+//- If cart is empty, fall through to expire the "Keep Cart" cookies
             case 'NOTIFIER_CART_RESET_END':
             case 'NOTIFY_HEADER_START_LOGOFF':
             case 'NOTIFY_HEADER_START_CHECKOUT_SUCCESS':
@@ -206,6 +212,9 @@ class save_cart extends base
         }
     }
 
+    /**
+     * @return void
+     */
     protected function expireKeepCartCookie()
     {
         $this->cookie_options['expires'] = time() - 3600;
