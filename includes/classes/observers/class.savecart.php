@@ -104,13 +104,13 @@ class save_cart extends base
                         // First, check to see that the base product is still present and not disabled.  If so, the
                         // product will be removed from the customer's shopping-cart.
                         //
-                        $prid = zen_get_prid($products_id);
+                        $prid = (int)$products_id;//$products_id will be an integer if no atttributes (avoid zen_get_prid which is hinted as string)
                         $status_info = $db->Execute(
-                            "SELECT products_status
-                               FROM " . TABLE_PRODUCTS . "
-                              WHERE products_id = " . (int)$prid . "
+                            'SELECT products_status
+                               FROM ' . TABLE_PRODUCTS . '
+                              WHERE products_id = ' . $prid . '
                                 AND products_status != 0
-                              LIMIT 1"
+                              LIMIT 1'
                         );
                         if ($status_info->EOF) {
                             unset($_SESSION['cart']->contents[$products_id]);
@@ -127,7 +127,7 @@ class save_cart extends base
                         //
                         if (isset($details['attributes'])) {
                             $attributes_ok = true;
-                            $language_id = (isset($_SESSION['languages_id'])) ? $_SESSION['languages_id'] : 1;
+                            $language_id = (isset($_SESSION['languages_id'])) ? (int)$_SESSION['languages_id'] : 1;
                             foreach ($details['attributes'] as $options_id => $options_values_id) {
                                 $attr_check = $db->Execute(
                                     "SELECT pa.products_attributes_id
