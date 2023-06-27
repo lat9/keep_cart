@@ -29,6 +29,8 @@ if (!defined('IS_ADMIN_FLAG')) {
 
 class save_cart extends base
 {
+    private array $cookie_options = [];
+
     public function __construct()
     {
         global $db;
@@ -48,15 +50,28 @@ class save_cart extends base
                 $_SESSION['kc_disabled_logged'] = true;
                 return;
             }
+
+            $domain = str_replace(['https://', 'http://', '//'], '', strtolower(HTTP_SERVER));
+            $secure = (stripos(HTTP_SERVER, 'https://') === 0);
+            $this->cookie_options = [
+                'expires' => strtotime('+' . ((ctype_digit(KEEP_CART_DURATION)) ? KEEP_CART_DURATION : '30') . ' days'),
+                'path' => DIR_WS_CATALOG,
+                'domain' => $domain,
+                'secure' => $secure,
+                'httponly' => true,
+                'samesite' => 'lax'
+            ];
+
             $this->attach($this, [
-                'NOTIFIER_CART_ADD_CART_END',
-                'NOTIFIER_CART_UPDATE_QUANTITY_END',
-                'NOTIFIER_CART_CLEANUP_END',
-                'NOTIFIER_CART_REMOVE_END',
-                'NOTIFIER_CART_RESET_END',
-                'NOTIFIER_CART_RESTORE_CONTENTS_END',
-                'NOTIFY_HEADER_START_CHECKOUT_SUCCESS',
-                'NOTIFY_HEADER_START_LOGOFF',
+                'NOTIFIER_CART_ADD_CART_END',           //on completion of function add_cart: when a product is added to the cart
+                'NOTIFIER_CART_UPDATE_QUANTITY_END',    //on completion of function add_cart: when a cart quantity is modified
+                'NOTIFIER_CART_CLEANUP_END',            //on completion of function cleanup: removal of zero quantity items from the cart:
+                // after add_cart / after restore_contents and 'NOTIFIER_CART_RESTORE_CONTENTS_END'
+                'NOTIFIER_CART_REMOVE_END',             //on completion of function remove: removal of a product from the cart
+                'NOTIFIER_CART_RESET_END',              //on completion of function reset: clears all products from the cart: _construct / remove_all / restore_contents (prior to 'NOTIFIER_CART_RESTORE_CONTENTS_END')
+                'NOTIFIER_CART_RESTORE_CONTENTS_END',   //on completion of function restore_contents: restore of cart contents as stored in the database, when customer logs in
+                'NOTIFY_HEADER_START_CHECKOUT_SUCCESS', //on pageload/header of checkout_success/order completion
+                'NOTIFY_HEADER_START_LOGOFF',           //on pageload/header of logoff
             ]);
 
             if (isset($_COOKIE['cart'], $_COOKIE['cartkey']) && isset($_SESSION['cart']) && empty($_SESSION['cart']->contents)) {
@@ -89,13 +104,13 @@ class save_cart extends base
                         // First, check to see that the base product is still present and not disabled.  If so, the
                         // product will be removed from the customer's shopping-cart.
                         //
-                        $prid = zen_get_prid($products_id);
+                        $prid = (int)$products_id;//$products_id will be an integer if no atttributes (avoid zen_get_prid which is hinted as string)
                         $status_info = $db->Execute(
-                            "SELECT products_status
-                               FROM " . TABLE_PRODUCTS . "
-                              WHERE products_id = " . (int)$prid . "
+                            'SELECT products_status
+                               FROM ' . TABLE_PRODUCTS . '
+                              WHERE products_id = ' . $prid . '
                                 AND products_status != 0
-                              LIMIT 1"
+                              LIMIT 1'
                         );
                         if ($status_info->EOF) {
                             unset($_SESSION['cart']->contents[$products_id]);
@@ -112,7 +127,7 @@ class save_cart extends base
                         //
                         if (isset($details['attributes'])) {
                             $attributes_ok = true;
-                            $language_id = (isset($_SESSION['languages_id'])) ? $_SESSION['languages_id'] : 1;
+                            $language_id = (isset($_SESSION['languages_id'])) ? (int)$_SESSION['languages_id'] : 1;
                             foreach ($details['attributes'] as $options_id => $options_values_id) {
                                 $attr_check = $db->Execute(
                                     "SELECT pa.products_attributes_id
@@ -141,7 +156,7 @@ class save_cart extends base
 
                         // -----
                         // Finally, make sure that there's stock available for purchase (if the store's so configured).  If there's no
-                        // stock, the associated product is removed from the customer's cart; if there's not
+                        // stock, the associated product is removed from the customer's cart; if there is not
                         // sufficient stock, the product's cart-quantity is reduced to what's available.
                         //
                         if (STOCK_ALLOW_CHECKOUT === 'false') {
@@ -164,43 +179,30 @@ class save_cart extends base
         }
     }
 
-    public function update(&$class, $eventID)
+    /**
+     * @param $class
+     * @param $eventID
+     * @return void
+     */
+    public function update(&$class, $eventID): void
     {
-        $domain = str_replace(
-            [
-                'https://',
-                'http://',
-                '//'
-            ],
-            '',
-            strtolower(HTTP_SERVER)
-        );
-        $secure = (stripos(HTTP_SERVER, 'https://') === 0);
-        $cookie_options = [
-            'expires' => strtotime('+' . ((ctype_digit(KEEP_CART_DURATION)) ? KEEP_CART_DURATION : '30') . ' days'),
-            'path' => DIR_WS_CATALOG,
-            'domain' => $domain,
-            'secure' => $secure,
-            'httponly' => true,
-            'samesite' => 'lax'
-        ];
         switch ($eventID) {
-            case 'NOTIFIER_CART_ADD_CART_END':
-            case 'NOTIFIER_CART_UPDATE_QUANTITY_END':
-            case 'NOTIFIER_CART_CLEANUP_END':
-            case 'NOTIFIER_CART_REMOVE_END':
+            case 'NOTIFIER_CART_ADD_CART_END':        // on adding a product to the cart
+            case 'NOTIFIER_CART_UPDATE_QUANTITY_END': // on change quantity in cart
+            case 'NOTIFIER_CART_CLEANUP_END':         // at the end of add to cart and restore stored basket to cart post-login
+            case 'NOTIFIER_CART_REMOVE_END':          // on removal/delete product from cart
                 if (!empty($_SESSION['cart']->contents)) {
                     if (!zen_is_logged_in() || zen_in_guest_checkout()) {
                         $cookie_value = serialize($_SESSION['cart']->contents);
                         $cookie_value = gzcompress($cookie_value, 9);
                         $cookie_value = base64_encode($cookie_value);
                         $hash_key = md5(KEEP_CART_SECRET . $cookie_value);
-                        setcookie('cart', $cookie_value, $cookie_options);
-                        setcookie('cartkey', $hash_key, $cookie_options);
+                        setcookie('cart', $cookie_value, $this->cookie_options);
+                        setcookie('cartkey', $hash_key, $this->cookie_options);
                     }
                     break;
-                }               //- If cart is empty, fall through to expire the "Keep Cart" cookies
-
+                }
+//- If cart is empty, fall through to expire the "Keep Cart" cookies
             case 'NOTIFIER_CART_RESET_END':
             case 'NOTIFY_HEADER_START_LOGOFF':
             case 'NOTIFY_HEADER_START_CHECKOUT_SUCCESS':
@@ -210,10 +212,13 @@ class save_cart extends base
         }
     }
 
-    protected function expireKeepCartCookie()
+    /**
+     * @return void
+     */
+    protected function expireKeepCartCookie(): void
     {
-        $cookie_options['expires'] = time() - 3600;
-        setcookie('cart', '', $cookie_options);
-        setcookie('cartkey', '', $cookie_options);
+        $this->cookie_options['expires'] = time() - 3600;
+        setcookie('cart', '', $this->cookie_options);
+        setcookie('cartkey', '', $this->cookie_options);
     }
 }
