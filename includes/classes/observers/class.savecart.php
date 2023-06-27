@@ -1,9 +1,9 @@
 <?php
 /*
-Keep-Cart v2.0.3
+Keep-Cart v2.0.4
 
 Copyright C.J.Pinder 2009 http://www.zen-unlocked.com
-Copyright 2021-2022, lat9, https://vinosdefrutastropicales.com
+Copyright 2021-2023, lat9, https://vinosdefrutastropicales.com
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

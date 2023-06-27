@@ -1,4 +1,4 @@
-Keep Cart (v2.0.3) Plugin for Zen Cart
+Keep Cart (v2.0.4) Plugin for Zen Cart
 =====================================
 
 Created by Christian Pinder.
@@ -9,7 +9,7 @@ Copyright (c) C.J.Pinder 2009
 Updated 20211107-lat9: Copyright (C) 2021, Vinos de Frutas Tropicales
 Updated 20211210-lat9: Copyright (C) 2021, Vinos de Frutas Tropicales
 Updated 20220307-lat9: Copyright (C) 2022, Vinos de Frutas Tropicales
-Updated 20221227-lat9, prosela, torvista: Copyright (C) 2022, Vinos de Frutas Tropicales
+Updated 20230627-lat9, prosela, torvista: Copyright (C) 2021-2023, Vinos de Frutas Tropicales
 
 ATTENTION:
 ==========
@@ -72,6 +72,9 @@ with the cookie on the visitor's PC.
 
 VERSION HISTORY
 ===============
+v2.0.4, 20230627, torvista, lat9
+    - Correct "not expiring" cookie; last item cannot be removed from the cart.
+
 v2.0.3, 20221227, lat9, prosela, torvista
     - Log configuration errors only once per customer session.
     - Prevent PHP warnings by expiring a "Keep Cart" cookie if its data is invalid.
